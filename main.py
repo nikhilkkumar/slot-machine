@@ -1,6 +1,6 @@
 import random 
 
-MAX_LINES = 5
+MAX_LINES = 3
 MIN_BET = 10
 MAX_BET = 50
 
@@ -12,6 +12,13 @@ symbol_count = {
     "B": 4,
     "C": 6,
     "D": 8
+}
+
+symbol_values = {
+    "A": 10,
+    "B": 5,
+    "C": 3,
+    "D": 2,
 }
 
 def get_slot_machine_spin(rows, cols, symbols):
@@ -39,11 +46,37 @@ def get_slot_machine_spin(rows, cols, symbols):
 def print_slot_machine(columns):
     for row in range(len(columns[0])):
         for i, column in enumerate(columns):
-            if i != len(columns) - 1":
-                print(column[row, "|"])
+            if i != len(columns) - 1:
+                print(column[row], end = " | ")
             else:
                 print(column[row])
 
+def calc_payout(columns,lines,bet,values):
+    winnings = 0
+    winning_lines = []
+    for line in range(lines-1):
+        symbol = columns[0][line]
+        for column in columns:
+            symbol_to_check = column[line]
+            if symbol_to_check != symbol:
+                break
+        else:
+            winnings += bet*values[symbol]
+            winning_lines.append(line+1)
+        
+    return winnings, winning_lines
+    # payout = 0
+    # for line in range(lines-1):
+    #     lines_bet = []
+    #     for column in columns:
+    #         lines_bet.append(column[line])
+    #         symbol = lines_bet[0]
+    #     if all(x == symbol for x in lines_bet):
+    #         payout += (values[symbol]*bet)
+    #     else:
+    #         payout += 0
+    # return payout  
+    # code works^^  
 def deposit():
     while True:
         amount = input("What would you like to deposit? $")
@@ -86,8 +119,7 @@ def get_bet():
 
     return amount
 
-def main():
-    balance = deposit()
+def game():
     lines = get_number_of_lines()
     while True:
         bet = get_bet()
@@ -100,5 +132,17 @@ def main():
     
     print(f"You are betting ${bet} on {lines} lines. Total bet is equal to: ${total_bet}")
 
+    slots = get_slot_machine_spin(ROWS, COLS, symbol_count)
+    print_slot_machine(slots)
+    payout, winning_lines = calc_payout(slots,lines,bet,symbol_values)
+    print(f"You won ${payout} !")
+    print(f"Youn won on lines:", *winning_lines)
+    return payout-total_bet
+
+def main():
+    balance = deposit()
+    while balance > 0:
+        balance += game()
+    print("Out of money!")
 
 main()
